@@ -35,7 +35,11 @@ public class WebSecurityConfig {
                 .cors().and().csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeHttpRequests()
-                .anyRequest().permitAll().and() // will be changed in future
+                .requestMatchers("/auth/sign-up").permitAll()
+                .requestMatchers("/auth/sign-in").permitAll()
+                .requestMatchers("/test/all").permitAll()
+                .requestMatchers("/test/authenticated").authenticated()
+                .anyRequest().authenticated().and()
                 .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling()
                 .accessDeniedHandler(jwtAccessDeniedHandler)
