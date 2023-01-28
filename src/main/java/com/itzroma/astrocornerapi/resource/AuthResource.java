@@ -1,6 +1,7 @@
 package com.itzroma.astrocornerapi.resource;
 
 import com.itzroma.astrocornerapi.model.dto.AuthResponse;
+import com.itzroma.astrocornerapi.model.dto.RefreshTokenRequest;
 import com.itzroma.astrocornerapi.model.dto.SignInRequest;
 import com.itzroma.astrocornerapi.model.dto.SignUpRequest;
 import com.itzroma.astrocornerapi.service.AuthService;
@@ -27,5 +28,10 @@ public class AuthResource {
     @PostMapping("/sign-in")
     public ResponseEntity<AuthResponse> signIn(@RequestBody SignInRequest signInRequest) {
         return new ResponseEntity<>(authService.signIn(signInRequest), HttpStatus.OK);
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<AuthResponse> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+        return new ResponseEntity<>(authService.refreshToken(refreshTokenRequest), HttpStatus.OK);
     }
 }

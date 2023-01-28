@@ -4,10 +4,10 @@ import com.itzroma.astrocornerapi.exception.EntityExistsException;
 import com.itzroma.astrocornerapi.exception.EntityNotFoundException;
 import com.itzroma.astrocornerapi.model.entity.User;
 import com.itzroma.astrocornerapi.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor

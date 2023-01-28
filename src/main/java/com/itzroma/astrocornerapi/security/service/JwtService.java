@@ -6,7 +6,12 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.itzroma.astrocornerapi.exception.EntityNotFoundException;
+import com.itzroma.astrocornerapi.model.entity.RefreshToken;
+import com.itzroma.astrocornerapi.model.entity.User;
+import com.itzroma.astrocornerapi.repository.UserRepository;
 import com.itzroma.astrocornerapi.security.userdetails.JwtUserDetails;
+import com.itzroma.astrocornerapi.service.RefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,18 +27,30 @@ public class JwtService {
     private final Algorithm accessTokenAlgorithm;
     private final Algorithm refreshTokenAlgorithm;
 
-    @Value("${app.security.jwt.access.expiration-ms}")
-    private Long accessTokenExpirationMs;
-
-    @Value("${app.security.jwt.refresh.expiration-ms}")
-    private Long refreshTokenExpirationMs;
-
     private HttpServletRequest request;
+    private UserRepository userRepository;
+    private RefreshTokenService refreshTokenService;
 
     @Autowired
     public void setRequest(HttpServletRequest request) {
         this.request = request;
     }
+
+    @Autowired
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    @Autowired
+    public void setRefreshTokenService(RefreshTokenService refreshTokenService) {
+        this.refreshTokenService = refreshTokenService;
+    }
+
+    @Value("${app.security.jwt.access.expiration-ms}")
+    private Long accessTokenExpirationMs;
+
+    @Value("${app.security.jwt.refresh.expiration-ms}")
+    private Long refreshTokenExpirationMs;
 
     public JwtService(@Value("${app.security.jwt.access.secret}") String accessSecret,
                       @Value("${app.security.jwt.refresh.secret}") String refreshSecret) {
@@ -52,12 +69,18 @@ public class JwtService {
     }
 
     public String generateRefreshToken(JwtUserDetails jwtUserDetails) {
-        return JWT.create()
+        User user = userRepository.findByEmail(jwtUserDetails.getUsername()).orElseThrow(() -> {
+            throw new EntityNotFoundException("Cannot generate refresh token: user by email not found");
+        });
+
+        String token = JWT.create()
                 .withIssuer(request.getRequestURL().toString())
-                .withSubject(jwtUserDetails.getUsername())
+                .withSubject(user.getEmail())
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + refreshTokenExpirationMs))
                 .sign(refreshTokenAlgorithm);
+
+        return refreshTokenService.save(new RefreshToken(user, token)).getToken();
     }
 
     private boolean validateToken(String token, Algorithm algorithm) {
@@ -67,6 +90,9 @@ public class JwtService {
         } catch (SignatureVerificationException ex) {
             log.error("Invalid JWT signature: {}", ex.getMessage());
         } catch (TokenExpiredException ex) {
+            if (algorithm == refreshTokenAlgorithm) {
+                refreshTokenService.deleteByToken(token);
+            }
             log.error("JWT token is expired: {}", ex.getMessage());
         } catch (JWTVerificationException ex) {
             log.error("Invalid JWT token: {}", ex.getMessage());

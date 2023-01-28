@@ -19,7 +19,7 @@ app:
     jwt:
       access:
         secret: SECRET_KEY_FOR_ACCESS_TOKEN
-        expiration-ms: 900000 # 15 min
+        expiration-ms: 15000 # 900000 # 15 min
       refresh:
         secret: SECRET_KEY_FOR_REFRESH_TOKEN
-        expiration-ms: 1296000000 # 15 days
+        expiration-ms: 30000 # 1296000000 # 15 days
