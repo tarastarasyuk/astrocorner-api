@@ -24,7 +24,7 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
         response.setStatus(HttpStatus.FORBIDDEN.value());
         OutputStream outputStream = response.getOutputStream();
         new ObjectMapper().writeValue(outputStream, new HttpExceptionResponse(
-                HttpStatus.FORBIDDEN, "Access denied"
+                HttpStatus.FORBIDDEN, accessDeniedException.getMessage()
         ));
         outputStream.flush();
     }

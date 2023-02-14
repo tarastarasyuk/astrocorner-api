@@ -27,9 +27,9 @@ public class User {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private Role role = Role.USER; // default role for now
+    private Role role = Role.USER;
 
-    private Boolean enabled = true; // will be changed after implementing email verification
+    private Boolean enabled = false;
 
     private Boolean locked = false;
 

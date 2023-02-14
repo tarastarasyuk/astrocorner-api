@@ -31,4 +31,8 @@ public class UserService {
     public User findByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(BadCredentialsException::new);
     }
+
+    public int enableUser(User user) {
+        return userRepository.enableUser(user.getEmail());
+    }
 }

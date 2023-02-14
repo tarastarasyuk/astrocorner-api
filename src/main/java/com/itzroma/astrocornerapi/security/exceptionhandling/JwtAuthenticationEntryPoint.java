@@ -24,7 +24,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         OutputStream outputStream = response.getOutputStream();
         new ObjectMapper().writeValue(outputStream, new HttpExceptionResponse(
-                HttpStatus.UNAUTHORIZED, "Authentication is required"
+                HttpStatus.UNAUTHORIZED, authException.getMessage()
         ));
         outputStream.flush();
     }

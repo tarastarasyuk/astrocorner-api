@@ -1,9 +1,6 @@
 package com.itzroma.astrocornerapi.exception.handler;
 
-import com.itzroma.astrocornerapi.exception.BadCredentialsException;
-import com.itzroma.astrocornerapi.exception.EmailTakenException;
-import com.itzroma.astrocornerapi.exception.EntityNotFoundException;
-import com.itzroma.astrocornerapi.exception.ReAuthenticationRequiredException;
+import com.itzroma.astrocornerapi.exception.*;
 import com.itzroma.astrocornerapi.model.dto.HttpExceptionResponse;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
@@ -13,6 +10,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class ExceptionHandlerResource implements ErrorController {
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<HttpExceptionResponse> badCredentialsException(BadCredentialsException ex) {
+        return createResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
     @ExceptionHandler(EmailTakenException.class)
     public ResponseEntity<HttpExceptionResponse> emailTakenException(EmailTakenException ex) {
         return createResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
@@ -23,14 +25,19 @@ public class ExceptionHandlerResource implements ErrorController {
         return createResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
+    @ExceptionHandler(EVTConfirmedException.class)
+    public ResponseEntity<HttpExceptionResponse> evtConfirmedException(EVTConfirmedException ex) {
+        return createResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(EVTExpiredException.class)
+    public ResponseEntity<HttpExceptionResponse> evtExpiredException(EVTExpiredException ex) {
+        return createResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
     @ExceptionHandler(ReAuthenticationRequiredException.class)
     public ResponseEntity<HttpExceptionResponse> reAuthenticationRequiredException(ReAuthenticationRequiredException ex) {
         return createResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
-    }
-
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<HttpExceptionResponse> badCredentialsException(BadCredentialsException ex) {
-        return createResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     private ResponseEntity<HttpExceptionResponse> createResponse(HttpStatus httpStatus, String message) {
