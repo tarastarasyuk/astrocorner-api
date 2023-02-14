@@ -90,10 +90,11 @@ public class JwtService {
         } catch (SignatureVerificationException ex) {
             log.error("Invalid JWT signature: {}", ex.getMessage());
         } catch (TokenExpiredException ex) {
+            log.error("JWT token is expired: {}", ex.getMessage());
             if (algorithm == refreshTokenAlgorithm) {
                 refreshTokenService.deleteByToken(token);
+                log.info("Expired JWT refresh token deleted");
             }
-            log.error("JWT token is expired: {}", ex.getMessage());
         } catch (JWTVerificationException ex) {
             log.error("Invalid JWT token: {}", ex.getMessage());
         } catch (Exception ex) {

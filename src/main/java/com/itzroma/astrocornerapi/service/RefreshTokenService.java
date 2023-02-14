@@ -15,11 +15,14 @@ public class RefreshTokenService {
 
     public RefreshToken findByToken(String token) {
         return refreshTokenRepository.findByToken(token).orElseThrow(() -> {
-            throw new EntityNotFoundException("JWT refresh token not found");
+            throw new EntityNotFoundException("JWT refresh token not found, re-authenticate please");
         });
     }
 
-    @Transactional
+//    @Transactional - has no sense in this annotation,
+//    because default save method from SimpleJpaRepository
+//    is already annotated with @Transactional,
+//    and this custom method doesn't contain additional logic
     public RefreshToken save(RefreshToken refreshToken) {
         return refreshTokenRepository.save(refreshToken);
     }

@@ -1,5 +1,6 @@
 package com.itzroma.astrocornerapi.service;
 
+import com.itzroma.astrocornerapi.exception.ReAuthenticationRequiredException;
 import com.itzroma.astrocornerapi.model.dto.AuthResponse;
 import com.itzroma.astrocornerapi.model.dto.RefreshTokenRequest;
 import com.itzroma.astrocornerapi.model.dto.SignInRequest;
@@ -38,20 +39,19 @@ public class AuthService {
 
     @Transactional
     public AuthResponse signIn(SignInRequest signInRequest) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                signInRequest.email(), signInRequest.password()
-        ));
         User user = userService.findByEmail(signInRequest.email());
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                user.getEmail(), signInRequest.password()
+        ));
         return generateAuthResponseFromUser(user);
     }
 
-    @Transactional
     public AuthResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
         RefreshToken refreshToken = refreshTokenService.findByToken(refreshTokenRequest.refreshToken());
         if (jwtService.validateRefreshToken(refreshToken.getToken())) {
             String accessToken = jwtService.generateAccessToken(JwtUserDetails.fromUser(refreshToken.getUser()));
             return new AuthResponse(accessToken, refreshToken.getToken());
         }
-        return null;
+        throw new ReAuthenticationRequiredException();
     }
 }
