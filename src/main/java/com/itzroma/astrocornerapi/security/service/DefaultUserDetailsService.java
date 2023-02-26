@@ -2,7 +2,7 @@ package com.itzroma.astrocornerapi.security.service;
 
 import com.itzroma.astrocornerapi.model.entity.User;
 import com.itzroma.astrocornerapi.repository.UserRepository;
-import com.itzroma.astrocornerapi.security.userdetails.JwtUserDetails;
+import com.itzroma.astrocornerapi.security.userdetails.DefaultUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class JwtUserDetailsService implements UserDetailsService {
+public class DefaultUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
@@ -20,6 +20,6 @@ public class JwtUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(username).orElseThrow(() -> {
             throw new UsernameNotFoundException("Cannot load user by username (email): username (email) not found");
         });
-        return JwtUserDetails.fromUser(user);
+        return DefaultUserDetails.fromUser(user);
     }
 }

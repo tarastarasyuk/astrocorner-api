@@ -1,9 +1,9 @@
 package com.itzroma.astrocornerapi.security.config;
 
-import com.itzroma.astrocornerapi.security.exceptionhandling.JwtAccessDeniedHandler;
-import com.itzroma.astrocornerapi.security.exceptionhandling.JwtAuthenticationEntryPoint;
+import com.itzroma.astrocornerapi.security.exceptionhandling.DefaultAccessDeniedHandler;
+import com.itzroma.astrocornerapi.security.exceptionhandling.DefaultAuthenticationEntryPoint;
 import com.itzroma.astrocornerapi.security.filter.JwtAuthorizationFilter;
-import com.itzroma.astrocornerapi.security.service.JwtUserDetailsService;
+import com.itzroma.astrocornerapi.security.service.DefaultUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,9 +25,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig {
 
     private final JwtAuthorizationFilter jwtAuthorizationFilter;
-    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
-    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    private final JwtUserDetailsService jwtUserDetailsService;
+    private final DefaultAccessDeniedHandler defaultAccessDeniedHandler;
+    private final DefaultAuthenticationEntryPoint defaultAuthenticationEntryPoint;
+    private final DefaultUserDetailsService defaultUserDetailsService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -41,15 +41,15 @@ public class WebSecurityConfig {
                 .anyRequest().authenticated().and()
                 .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling()
-                .accessDeniedHandler(jwtAccessDeniedHandler)
-                .authenticationEntryPoint(jwtAuthenticationEntryPoint).and()
+                .accessDeniedHandler(defaultAccessDeniedHandler)
+                .authenticationEntryPoint(defaultAuthenticationEntryPoint).and()
                 .build();
     }
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         return http.getSharedObject(AuthenticationManagerBuilder.class)
-                .userDetailsService(jwtUserDetailsService)
+                .userDetailsService(defaultUserDetailsService)
                 .passwordEncoder(passwordEncoder()).and()
                 .build();
     }

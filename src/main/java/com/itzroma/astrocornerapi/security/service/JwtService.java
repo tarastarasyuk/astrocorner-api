@@ -10,7 +10,7 @@ import com.itzroma.astrocornerapi.exception.EntityNotFoundException;
 import com.itzroma.astrocornerapi.model.entity.RefreshToken;
 import com.itzroma.astrocornerapi.model.entity.User;
 import com.itzroma.astrocornerapi.repository.UserRepository;
-import com.itzroma.astrocornerapi.security.userdetails.JwtUserDetails;
+import com.itzroma.astrocornerapi.security.userdetails.DefaultUserDetails;
 import com.itzroma.astrocornerapi.service.RefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -58,18 +58,18 @@ public class JwtService {
         refreshTokenAlgorithm = Algorithm.HMAC512(refreshSecret);
     }
 
-    public String generateAccessToken(JwtUserDetails jwtUserDetails) {
+    public String generateAccessToken(DefaultUserDetails defaultUserDetails) {
         return JWT.create()
                 .withIssuer(request.getRequestURL().toString())
-                .withSubject(jwtUserDetails.getUsername())
-                .withClaim("roles", jwtUserDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
+                .withSubject(defaultUserDetails.getUsername())
+                .withClaim("roles", defaultUserDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + accessTokenExpirationMs))
                 .sign(accessTokenAlgorithm);
     }
 
-    public String generateRefreshToken(JwtUserDetails jwtUserDetails) {
-        User user = userRepository.findByEmail(jwtUserDetails.getUsername()).orElseThrow(() -> {
+    public String generateRefreshToken(DefaultUserDetails defaultUserDetails) {
+        User user = userRepository.findByEmail(defaultUserDetails.getUsername()).orElseThrow(() -> {
             throw new EntityNotFoundException("Cannot generate refresh token: user by email not found");
         });
 

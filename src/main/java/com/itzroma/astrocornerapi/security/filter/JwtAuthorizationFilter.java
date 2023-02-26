@@ -1,8 +1,8 @@
 package com.itzroma.astrocornerapi.security.filter;
 
 import com.itzroma.astrocornerapi.security.service.JwtService;
-import com.itzroma.astrocornerapi.security.service.JwtUserDetailsService;
-import com.itzroma.astrocornerapi.security.userdetails.JwtUserDetails;
+import com.itzroma.astrocornerapi.security.service.DefaultUserDetailsService;
+import com.itzroma.astrocornerapi.security.userdetails.DefaultUserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +22,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
-    private final JwtUserDetailsService jwtUserDetailsService;
+    private final DefaultUserDetailsService defaultUserDetailsService;
     private final JwtService jwtService;
 
     @Override
@@ -37,9 +37,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         String username = jwtService.getSubjectFromAccessToken(accessToken);
         if (jwtService.validateAccessToken(accessToken) && SecurityContextHolder.getContext().getAuthentication() == null) {
-            JwtUserDetails jwtUserDetails = (JwtUserDetails) jwtUserDetailsService.loadUserByUsername(username);
+            DefaultUserDetails defaultUserDetails = (DefaultUserDetails) defaultUserDetailsService.loadUserByUsername(username);
             UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                    new UsernamePasswordAuthenticationToken(jwtUserDetails, null, jwtUserDetails.getAuthorities());
+                    new UsernamePasswordAuthenticationToken(defaultUserDetails, null, defaultUserDetails.getAuthorities());
             usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
         } else {

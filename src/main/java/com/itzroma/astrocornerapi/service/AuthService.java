@@ -10,7 +10,7 @@ import com.itzroma.astrocornerapi.model.entity.EmailVerificationToken;
 import com.itzroma.astrocornerapi.model.entity.RefreshToken;
 import com.itzroma.astrocornerapi.model.entity.User;
 import com.itzroma.astrocornerapi.security.service.JwtService;
-import com.itzroma.astrocornerapi.security.userdetails.JwtUserDetails;
+import com.itzroma.astrocornerapi.security.userdetails.DefaultUserDetails;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -70,16 +70,16 @@ public class AuthService {
     }
 
     private AuthResponse generateAuthResponseFromUser(User user) {
-        JwtUserDetails jwtUserDetails = JwtUserDetails.fromUser(user);
-        String accessToken = jwtService.generateAccessToken(jwtUserDetails);
-        String refreshToken = jwtService.generateRefreshToken(jwtUserDetails);
+        DefaultUserDetails defaultUserDetails = DefaultUserDetails.fromUser(user);
+        String accessToken = jwtService.generateAccessToken(defaultUserDetails);
+        String refreshToken = jwtService.generateRefreshToken(defaultUserDetails);
         return new AuthResponse(accessToken, refreshToken);
     }
 
     public AuthResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
         RefreshToken refreshToken = refreshTokenService.findByToken(refreshTokenRequest.refreshToken());
         if (jwtService.validateRefreshToken(refreshToken.getToken())) {
-            String accessToken = jwtService.generateAccessToken(JwtUserDetails.fromUser(refreshToken.getUser()));
+            String accessToken = jwtService.generateAccessToken(DefaultUserDetails.fromUser(refreshToken.getUser()));
             return new AuthResponse(accessToken, refreshToken.getToken());
         }
         throw new ReAuthenticationRequiredException();
