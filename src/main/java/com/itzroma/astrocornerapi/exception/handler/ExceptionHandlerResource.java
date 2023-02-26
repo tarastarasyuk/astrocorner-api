@@ -5,11 +5,18 @@ import com.itzroma.astrocornerapi.model.dto.HttpExceptionResponse;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @RestControllerAdvice
 public class ExceptionHandlerResource implements ErrorController {
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<HttpExceptionResponse> badCredentialsException(BadCredentialsException ex) {
         return createResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
@@ -38,6 +45,16 @@ public class ExceptionHandlerResource implements ErrorController {
     @ExceptionHandler(ReAuthenticationRequiredException.class)
     public ResponseEntity<HttpExceptionResponse> reAuthenticationRequiredException(ReAuthenticationRequiredException ex) {
         return createResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<HttpExceptionResponse> handleValidationException(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .collect(Collectors.toMap(FieldError::getField,
+                        fieldError -> Optional.ofNullable(fieldError.getDefaultMessage()).orElse("Validation error")));
+        return createResponse(HttpStatus.BAD_REQUEST, errors.toString());
     }
 
     private ResponseEntity<HttpExceptionResponse> createResponse(HttpStatus httpStatus, String message) {

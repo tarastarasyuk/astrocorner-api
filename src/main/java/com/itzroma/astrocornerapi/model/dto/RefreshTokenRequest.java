@@ -1,4 +1,8 @@
 package com.itzroma.astrocornerapi.model.dto;
 
-public record RefreshTokenRequest(String refreshToken) {
+import jakarta.validation.constraints.NotEmpty;
+
+public record RefreshTokenRequest(
+        @NotEmpty(message = "Refresh token is required.")
+        String refreshToken) {
 }

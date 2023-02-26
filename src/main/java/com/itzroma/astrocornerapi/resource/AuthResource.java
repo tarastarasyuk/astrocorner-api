@@ -4,6 +4,7 @@ import com.itzroma.astrocornerapi.model.dto.*;
 import com.itzroma.astrocornerapi.service.AuthService;
 import com.itzroma.astrocornerapi.service.EmailVerificationTokenService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class AuthResource {
     private final EmailVerificationTokenService emailVerificationTokenService;
 
     @PostMapping("/sign-up")
-    public ResponseEntity<UserDto> signUn(@RequestBody SignUpRequest signUpRequest, HttpServletRequest request) {
+    public ResponseEntity<UserDto> signUn(@Valid @RequestBody SignUpRequest signUpRequest, HttpServletRequest request) {
         return new ResponseEntity<>(
                 new UserDto(authService.signUp(signUpRequest, request).getEmail()),
                 HttpStatus.CREATED
@@ -44,12 +45,12 @@ public class AuthResource {
     }
 
     @PostMapping("/sign-in")
-    public ResponseEntity<AuthResponse> signIn(@RequestBody SignInRequest signInRequest) {
+    public ResponseEntity<AuthResponse> signIn(@Valid @RequestBody SignInRequest signInRequest) {
         return new ResponseEntity<>(authService.signIn(signInRequest), HttpStatus.OK);
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<AuthResponse> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+    public ResponseEntity<AuthResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
         return new ResponseEntity<>(authService.refreshToken(refreshTokenRequest), HttpStatus.OK);
     }
 }
