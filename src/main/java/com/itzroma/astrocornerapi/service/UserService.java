@@ -2,6 +2,7 @@ package com.itzroma.astrocornerapi.service;
 
 import com.itzroma.astrocornerapi.exception.BadCredentialsException;
 import com.itzroma.astrocornerapi.exception.EmailTakenException;
+import com.itzroma.astrocornerapi.model.entity.AuthProvider;
 import com.itzroma.astrocornerapi.model.entity.User;
 import com.itzroma.astrocornerapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +23,8 @@ public class UserService {
             throw new EmailTakenException();
         }
 
-        // TODO: 2/14/2023 validate user's email
-
+        // TODO: Change flow
+        user.setProvider(AuthProvider.GOOGLE);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }

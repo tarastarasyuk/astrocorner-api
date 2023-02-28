@@ -3,6 +3,10 @@ package com.itzroma.astrocornerapi.security.config;
 import com.itzroma.astrocornerapi.security.exceptionhandling.DefaultAccessDeniedHandler;
 import com.itzroma.astrocornerapi.security.exceptionhandling.DefaultAuthenticationEntryPoint;
 import com.itzroma.astrocornerapi.security.filter.JwtAuthorizationFilter;
+import com.itzroma.astrocornerapi.security.oauth2.DefaultOAuth2UserService;
+import com.itzroma.astrocornerapi.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
+import com.itzroma.astrocornerapi.security.oauth2.handler.OAuth2AuthenticationFailureHandler;
+import com.itzroma.astrocornerapi.security.oauth2.handler.OAuth2AuthenticationSuccessHandler;
 import com.itzroma.astrocornerapi.security.service.DefaultUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -24,26 +28,103 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class WebSecurityConfig {
 
-    private final JwtAuthorizationFilter jwtAuthorizationFilter;
     private final DefaultAccessDeniedHandler defaultAccessDeniedHandler;
     private final DefaultAuthenticationEntryPoint defaultAuthenticationEntryPoint;
     private final DefaultUserDetailsService defaultUserDetailsService;
+    private final DefaultOAuth2UserService defaultOAuth2UserService;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
+
+
+    // TODO: try to avoid HttpCookieOAuth2AuthorizationRequestRepository and JwtAuthorizationFilter bean methods
+    @Bean
+    public HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository() {
+        return new HttpCookieOAuth2AuthorizationRequestRepository();
+    }
+
+    @Bean
+    public JwtAuthorizationFilter jwtAuthorizationFilter() {
+        return new JwtAuthorizationFilter();
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
-                .cors().and().csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+        http
+                .cors()
+                    .disable()
+                .csrf()
+                    .disable()
+                .httpBasic()
+                    .disable()
+                .formLogin()
+                    .disable()
+                .sessionManagement()
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    .and()
+                .exceptionHandling()
+                    .accessDeniedHandler(defaultAccessDeniedHandler)
+                    .authenticationEntryPoint(defaultAuthenticationEntryPoint)
+                    .and()
                 .authorizeHttpRequests()
-                .requestMatchers("/auth/*").permitAll()
+                .requestMatchers("/auth/**", "/oauth2/**").permitAll()
                 .requestMatchers("/test/all").permitAll()
                 .requestMatchers("/test/authenticated").authenticated()
-                .anyRequest().authenticated().and()
-                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling()
-                .accessDeniedHandler(defaultAccessDeniedHandler)
-                .authenticationEntryPoint(defaultAuthenticationEntryPoint).and()
+                .anyRequest()
+                    .authenticated()
+                    .and()
+                .oauth2Login()
+                    .authorizationEndpoint()
+                        .baseUri("/oauth2/authorize")
+                        .authorizationRequestRepository(cookieAuthorizationRequestRepository())
+                        .and()
+                    .redirectionEndpoint()
+                        .baseUri("/oauth2/callback/*")
+                        .and()
+                    .userInfoEndpoint()
+                        .userService(defaultOAuth2UserService)
+                        .and()
+                    .successHandler(oAuth2AuthenticationSuccessHandler)
+                    .failureHandler(oAuth2AuthenticationFailureHandler);
+        return http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .build();
+//        http
+//                .cors()
+//                .and()
+//                .sessionManagement()
+////                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//                .and()
+//                .csrf()
+//                .disable()
+//                .formLogin()
+//                .disable()
+//                .httpBasic()
+//                .disable()
+//                .exceptionHandling()
+//                .authenticationEntryPoint(defaultAuthenticationEntryPoint)
+//                .and()
+//                .authorizeRequests()
+//                .requestMatchers("/auth/**", "/oauth2/**")
+//                .permitAll()
+//                .anyRequest()
+//                .authenticated()
+//                .and()
+//                .oauth2Login()
+//                .authorizationEndpoint()
+//                .baseUri("/oauth2/authorize")
+//                .authorizationRequestRepository(cookieAuthorizationRequestRepository())
+//                .and()
+//                .redirectionEndpoint()
+//                .baseUri("/oauth2/callback/*")
+//                .and()
+//                .userInfoEndpoint()
+//                .userService(defaultOAuth2UserService)
+//                .and()
+//                .successHandler(oAuth2AuthenticationSuccessHandler)
+//                .failureHandler(oAuth2AuthenticationFailureHandler);
+//
+//        // Add our custom Token based authentication filter
+//        http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+//        return http.build();
     }
 
     @Bean

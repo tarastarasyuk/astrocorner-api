@@ -2,6 +2,7 @@ package com.itzroma.astrocornerapi.model.entity;
 
 import com.itzroma.astrocornerapi.model.Role;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.Hibernate;
 
@@ -25,6 +26,14 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private AuthProvider provider;
+
+    private String providerId;
+
+    private String name;
 
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
