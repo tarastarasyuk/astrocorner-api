@@ -49,7 +49,7 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
+        return http
                 .cors()
                     .disable()
                 .csrf()
@@ -84,47 +84,10 @@ public class WebSecurityConfig {
                         .userService(defaultOAuth2UserService)
                         .and()
                     .successHandler(oAuth2AuthenticationSuccessHandler)
-                    .failureHandler(oAuth2AuthenticationFailureHandler);
-        return http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
+                    .failureHandler(oAuth2AuthenticationFailureHandler)
+                    .and()
+                .addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .build();
-//        http
-//                .cors()
-//                .and()
-//                .sessionManagement()
-////                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                .and()
-//                .csrf()
-//                .disable()
-//                .formLogin()
-//                .disable()
-//                .httpBasic()
-//                .disable()
-//                .exceptionHandling()
-//                .authenticationEntryPoint(defaultAuthenticationEntryPoint)
-//                .and()
-//                .authorizeRequests()
-//                .requestMatchers("/auth/**", "/oauth2/**")
-//                .permitAll()
-//                .anyRequest()
-//                .authenticated()
-//                .and()
-//                .oauth2Login()
-//                .authorizationEndpoint()
-//                .baseUri("/oauth2/authorize")
-//                .authorizationRequestRepository(cookieAuthorizationRequestRepository())
-//                .and()
-//                .redirectionEndpoint()
-//                .baseUri("/oauth2/callback/*")
-//                .and()
-//                .userInfoEndpoint()
-//                .userService(defaultOAuth2UserService)
-//                .and()
-//                .successHandler(oAuth2AuthenticationSuccessHandler)
-//                .failureHandler(oAuth2AuthenticationFailureHandler);
-//
-//        // Add our custom Token based authentication filter
-//        http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
-//        return http.build();
     }
 
     @Bean

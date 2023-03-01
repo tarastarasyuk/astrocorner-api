@@ -20,8 +20,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Objects;
 
+import static com.itzroma.astrocornerapi.security.oauth2.constant.DefaultOAuth2Constant.OAUTH2_JWT_TOKEN_PASS_NAME;
+
 //@Component
 //@RequiredArgsConstructor
+//To avoid circular dependency
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     @Autowired
@@ -58,7 +61,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
             return authHeader.split(" ")[1];
         } else {
-            Object tokenAttr = request.getSession().getAttribute("OAuth2-JWT-Token") ;
+            Object tokenAttr = request.getSession().getAttribute(OAUTH2_JWT_TOKEN_PASS_NAME) ;
             if (Objects.nonNull(tokenAttr)) {
                 return (String) tokenAttr;
             }

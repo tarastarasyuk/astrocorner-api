@@ -3,11 +3,12 @@ package com.itzroma.astrocornerapi.security.oauth2;
 import com.itzroma.astrocornerapi.exception.OAuth2AuthenticationProcessingException;
 import com.itzroma.astrocornerapi.model.entity.User;
 import com.itzroma.astrocornerapi.repository.UserRepository;
-import com.itzroma.astrocornerapi.security.oauth2.userinfo.OAuth2UserInfo;
-import com.itzroma.astrocornerapi.security.oauth2.userinfo.OAuth2UserInfoFactory;
+import com.itzroma.astrocornerapi.security.oauth2.userinformation.OAuth2UserInfo;
+import com.itzroma.astrocornerapi.security.oauth2.userinformation.OAuth2UserInfoFactory;
 import com.itzroma.astrocornerapi.model.entity.AuthProvider;
 import com.itzroma.astrocornerapi.security.userdetails.DefaultUserDetails;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class DefaultOAuth2UserService extends org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService {
@@ -33,6 +35,7 @@ public class DefaultOAuth2UserService extends org.springframework.security.oauth
         } catch (AuthenticationException ex) {
             throw ex;
         } catch (Exception ex) {
+            log.debug("InternalAuthenticationServiceException: processOAuth2User failed for user: "+ oAuth2User.getName());
             // Throwing an instance of AuthenticationException will trigger the OAuth2AuthenticationFailureHandler
             throw new InternalAuthenticationServiceException(ex.getMessage(), ex.getCause());
         }
@@ -45,10 +48,17 @@ public class DefaultOAuth2UserService extends org.springframework.security.oauth
         }
 
         Optional<User> userOptional = userRepository.findByEmail(oAuth2UserInfo.getEmail());
-        User user = null;
+        User user = handleUserAuth(oAuth2UserRequest, oAuth2UserInfo, userOptional);
+
+        return DefaultUserDetails.create(user, oAuth2User.getAttributes());
+    }
+
+    private User handleUserAuth(OAuth2UserRequest oAuth2UserRequest, OAuth2UserInfo oAuth2UserInfo, Optional<User> userOptional) {
+        User user;
         if(userOptional.isPresent()) {
             user = userOptional.get();
             if(!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId().toUpperCase()))) {
+                log.debug("Not correct oauth2 provider");
                 throw new OAuth2AuthenticationProcessingException("Looks like you're signed up with " +
                         user.getProvider() + " account. Please use your " + user.getProvider() +
                         " account to login.");
@@ -57,8 +67,7 @@ public class DefaultOAuth2UserService extends org.springframework.security.oauth
         } else {
             user = registerNewUser(oAuth2UserRequest, oAuth2UserInfo);
         }
-
-        return DefaultUserDetails.create(user, oAuth2User.getAttributes());
+        return user;
     }
 
     private User registerNewUser(OAuth2UserRequest oAuth2UserRequest, OAuth2UserInfo oAuth2UserInfo) {

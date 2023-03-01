@@ -1,4 +1,4 @@
-package com.itzroma.astrocornerapi.security.oauth2.userinfo;
+package com.itzroma.astrocornerapi.security.oauth2.userinformation;
 
 import java.util.Map;
 

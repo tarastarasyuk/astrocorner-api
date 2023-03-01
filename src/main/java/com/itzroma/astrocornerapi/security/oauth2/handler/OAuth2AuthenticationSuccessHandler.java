@@ -11,6 +11,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -20,8 +21,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Optional;
 
-import static com.itzroma.astrocornerapi.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
+import static com.itzroma.astrocornerapi.security.oauth2.constant.DefaultOAuth2Constant.OAUTH2_JWT_TOKEN_PASS_NAME;
+import static com.itzroma.astrocornerapi.security.oauth2.constant.DefaultOAuth2Constant.OAUTH2_REDIRECT_URI_PARAM_COOKIE_NAME;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
@@ -41,7 +44,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         addJwtTokenInSession(request, authentication);
 
         if (response.isCommitted()) {
-            logger.debug("Response has already been committed. Unable to redirect to " + targetUrl);
+            log.debug("Response has already been committed. Unable to redirect to " + targetUrl);
             return;
         }
 
@@ -51,14 +54,15 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private void addJwtTokenInSession(HttpServletRequest request, Authentication authentication) {
         String token = jwtService.generateAccessToken((DefaultUserDetails) authentication.getPrincipal());
-        request.getSession().setAttribute("OAuth2-JWT-Token", token);
+        request.getSession().setAttribute(OAUTH2_JWT_TOKEN_PASS_NAME, token);
     }
 
     protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        Optional<String> redirectUri = CookieUtils.getCookie(request, REDIRECT_URI_PARAM_COOKIE_NAME)
+        Optional<String> redirectUri = CookieUtils.getCookie(request, OAUTH2_REDIRECT_URI_PARAM_COOKIE_NAME)
                 .map(Cookie::getValue);
 
-        if(redirectUri.isPresent() && !isAuthorizedRedirectUri(redirectUri.get())) {
+        if (redirectUri.isPresent() && !isAuthorizedRedirectUri(redirectUri.get())) {
+            log.debug("Sorry! We've got an Unauthorized Redirect URI and can't proceed with the authentication");
             throw new BadRequestException("Sorry! We've got an Unauthorized Redirect URI and can't proceed with the authentication");
         }
 
@@ -78,15 +82,13 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         return appProperties.getOauth2().getAuthorizedRedirectUris()
                 .stream()
-                .anyMatch(authorizedRedirectUri -> {
-                    // Only validate host and port. Let the clients use different paths if they want to
-                    URI authorizedURI = URI.create(authorizedRedirectUri);
-                    if(authorizedURI.getHost().equalsIgnoreCase(clientRedirectUri.getHost())
-                            && authorizedURI.getPort() == clientRedirectUri.getPort()) {
-                        return true;
-                    }
-                    return false;
-                });
+                .anyMatch(authorizedRedirectUri -> validateHostAndPort(clientRedirectUri, authorizedRedirectUri));
+    }
+
+    private static boolean validateHostAndPort(URI clientRedirectUri, String authorizedRedirectUri) {
+        URI authorizedURI = URI.create(authorizedRedirectUri);
+        return authorizedURI.getHost().equalsIgnoreCase(clientRedirectUri.getHost())
+                && authorizedURI.getPort() == clientRedirectUri.getPort();
     }
 
 }
