@@ -9,7 +9,7 @@ public record HttpExceptionResponse(
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MM-dd-yyyy hh:mm:ss")
         Date timestamp,
         int statusCode,
-        String reasonPhrase,
+        String reason,
         String message
 ) {
     public HttpExceptionResponse(HttpStatus httpStatus, String message) {

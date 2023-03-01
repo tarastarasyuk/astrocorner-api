@@ -61,9 +61,13 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
             return authHeader.split(" ")[1];
         } else {
-            Object tokenAttr = request.getSession().getAttribute(OAUTH2_JWT_TOKEN_PASS_NAME) ;
-            if (Objects.nonNull(tokenAttr)) {
-                return (String) tokenAttr;
+//            Object tokenAttr = request.getSession().getAttribute(OAUTH2_JWT_TOKEN_PASS_NAME) ;
+//            if (Objects.nonNull(tokenAttr)) {
+//                return (String) tokenAttr;
+//            }
+            String token = request.getParameter("token");
+            if (StringUtils.hasText(token)) {
+                return token;
             }
         }
         return null;

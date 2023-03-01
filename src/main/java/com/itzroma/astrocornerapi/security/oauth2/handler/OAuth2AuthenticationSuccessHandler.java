@@ -41,7 +41,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String targetUrl = determineTargetUrl(request, response, authentication);
 
         // TODO: !IMPORTANT! change it !NOT SECURE!
-        addJwtTokenInSession(request, authentication);
+//        addJwtTokenInSession(request, authentication);
 
         if (response.isCommitted()) {
             log.debug("Response has already been committed. Unable to redirect to " + targetUrl);
@@ -52,10 +52,10 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 
-    private void addJwtTokenInSession(HttpServletRequest request, Authentication authentication) {
-        String token = jwtService.generateAccessToken((DefaultUserDetails) authentication.getPrincipal());
-        request.getSession().setAttribute(OAUTH2_JWT_TOKEN_PASS_NAME, token);
-    }
+//    private void addJwtTokenInSession(HttpServletRequest request, Authentication authentication) {
+//        String token = jwtService.generateAccessToken((DefaultUserDetails) authentication.getPrincipal());
+//        request.getSession().setAttribute(OAUTH2_JWT_TOKEN_PASS_NAME, token);
+//    }
 
     protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         Optional<String> redirectUri = CookieUtils.getCookie(request, OAUTH2_REDIRECT_URI_PARAM_COOKIE_NAME)
@@ -69,6 +69,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String targetUrl = redirectUri.orElse(getDefaultTargetUrl());
 
         return UriComponentsBuilder.fromUriString(targetUrl)
+                .queryParam("token", jwtService.generateAccessToken((DefaultUserDetails) authentication.getPrincipal()))
                 .build().toUriString();
     }
 
