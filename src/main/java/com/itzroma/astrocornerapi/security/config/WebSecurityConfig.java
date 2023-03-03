@@ -68,6 +68,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests()
                 .requestMatchers("/auth/**", "/oauth2/**").permitAll()
                 .requestMatchers("/auth/forgotPassword", "/auth/verifyRegistration").permitAll()
+                .requestMatchers("/forgot-password").permitAll()
                 .requestMatchers("/test/all").permitAll()
                 .requestMatchers("/test/authenticated").authenticated()
                 .anyRequest()

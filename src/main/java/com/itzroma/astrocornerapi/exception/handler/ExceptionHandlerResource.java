@@ -1,5 +1,6 @@
 package com.itzroma.astrocornerapi.exception.handler;
 
+import com.itzroma.astrocornerapi.exception.RateLimitException;
 import com.itzroma.astrocornerapi.exception.*;
 import com.itzroma.astrocornerapi.model.dto.HttpExceptionResponseDto;
 import org.springframework.boot.web.servlet.error.ErrorController;
@@ -45,6 +46,11 @@ public class ExceptionHandlerResource implements ErrorController {
     @ExceptionHandler(ReAuthenticationRequiredException.class)
     public ResponseEntity<HttpExceptionResponseDto> reAuthenticationRequiredException(ReAuthenticationRequiredException ex) {
         return createResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+
+    @ExceptionHandler(RateLimitException.class)
+    public ResponseEntity<HttpExceptionResponseDto> rateLimitException(RateLimitException ex) {
+        return createResponse(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
