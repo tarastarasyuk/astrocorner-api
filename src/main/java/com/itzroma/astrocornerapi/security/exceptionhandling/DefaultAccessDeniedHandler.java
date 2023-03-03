@@ -1,7 +1,7 @@
 package com.itzroma.astrocornerapi.security.exceptionhandling;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.itzroma.astrocornerapi.model.dto.HttpExceptionResponse;
+import com.itzroma.astrocornerapi.model.dto.HttpExceptionResponseDto;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,7 +23,7 @@ public class DefaultAccessDeniedHandler implements AccessDeniedHandler {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpStatus.FORBIDDEN.value());
         OutputStream outputStream = response.getOutputStream();
-        new ObjectMapper().writeValue(outputStream, new HttpExceptionResponse(
+        new ObjectMapper().writeValue(outputStream, new HttpExceptionResponseDto(
                 HttpStatus.FORBIDDEN, accessDeniedException.getMessage()
         ));
         outputStream.flush();

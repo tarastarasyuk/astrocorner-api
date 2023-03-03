@@ -11,7 +11,7 @@ import com.itzroma.astrocornerapi.model.entity.RefreshToken;
 import com.itzroma.astrocornerapi.model.entity.User;
 import com.itzroma.astrocornerapi.repository.UserRepository;
 import com.itzroma.astrocornerapi.security.userdetails.DefaultUserDetails;
-import com.itzroma.astrocornerapi.service.RefreshTokenService;
+import com.itzroma.astrocornerapi.service.impl.DefaultRefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ public class JwtService {
 
     private HttpServletRequest request;
     private UserRepository userRepository;
-    private RefreshTokenService refreshTokenService;
+    private DefaultRefreshTokenService defaultRefreshTokenService;
 
     @Autowired
     public void setRequest(HttpServletRequest request) {
@@ -42,8 +42,8 @@ public class JwtService {
     }
 
     @Autowired
-    public void setRefreshTokenService(RefreshTokenService refreshTokenService) {
-        this.refreshTokenService = refreshTokenService;
+    public void setRefreshTokenService(DefaultRefreshTokenService defaultRefreshTokenService) {
+        this.defaultRefreshTokenService = defaultRefreshTokenService;
     }
 
     @Value("${app.security.jwt.access.expiration-ms}")
@@ -80,7 +80,7 @@ public class JwtService {
                 .withExpiresAt(new Date(System.currentTimeMillis() + refreshTokenExpirationMs))
                 .sign(refreshTokenAlgorithm);
 
-        return refreshTokenService.save(new RefreshToken(user, token)).getToken();
+        return defaultRefreshTokenService.save(new RefreshToken(user, token)).getToken();
     }
 
     private boolean validateToken(String token, Algorithm algorithm) {
@@ -92,7 +92,7 @@ public class JwtService {
         } catch (TokenExpiredException ex) {
             log.error("JWT token is expired: {}", ex.getMessage());
             if (algorithm == refreshTokenAlgorithm) {
-                refreshTokenService.deleteByToken(token);
+                defaultRefreshTokenService.deleteByToken(token);
                 log.info("Expired JWT refresh token deleted");
             }
         } catch (JWTVerificationException ex) {

@@ -1,9 +1,9 @@
 package com.itzroma.astrocornerapi.resource;
 
 import com.itzroma.astrocornerapi.model.dto.*;
-import com.itzroma.astrocornerapi.service.AuthService;
-import com.itzroma.astrocornerapi.service.EmailVerificationTokenService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.itzroma.astrocornerapi.service.impl.DefaultAuthService;
+import com.itzroma.astrocornerapi.service.impl.DefaultEmailVerificationTokenService;
+import com.itzroma.astrocornerapi.service.impl.DefaultRefreshTokenService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,42 +15,40 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 public class AuthResource {
 
-    private final AuthService authService;
+    private final DefaultAuthService defaultAuthService;
 
-    private final EmailVerificationTokenService emailVerificationTokenService;
+    private final DefaultEmailVerificationTokenService defaultEmailVerificationTokenService;
+    private final DefaultRefreshTokenService defaultRefreshTokenService;
 
     @PostMapping("/sign-up")
-    public ResponseEntity<UserDto> signUn(@Valid @RequestBody SignUpRequest signUpRequest, HttpServletRequest request) {
+    public ResponseEntity<UserDto> signUn(@Valid @RequestBody SignUpRequestDto signUpRequestDto) {
         return new ResponseEntity<>(
-                new UserDto(authService.signUp(signUpRequest, request).getEmail()),
+                new UserDto(defaultAuthService.signUp(signUpRequestDto).getEmail()),
                 HttpStatus.CREATED
         );
     }
 
     @GetMapping("/verifyRegistration")
     public ResponseEntity<String> verifyRegistration(@RequestParam("token") String token) {
-        if (emailVerificationTokenService.validateEmailVerificationToken(token)) {
+        if (defaultEmailVerificationTokenService.validateEmailVerificationToken(token)) {
             return ResponseEntity.ok("User is verified");
         }
         return new ResponseEntity<>("Cannot verify user, invalid verification link", HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping("/resendEmailVerificationToken")
-    public ResponseEntity<String> resendEmailVerificationToken(@RequestParam("token") String old,
-                                                               HttpServletRequest request) {
-        if (authService.resendEmailVerificationToken(old, request)) {
-            return ResponseEntity.ok("Verification link is resend");
-        }
-        return new ResponseEntity<>("Cannot resend verification link", HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<String> resendEmailVerificationToken(@RequestParam("token") String old) {
+        defaultEmailVerificationTokenService.resendEmailVerificationToken(old);
+        return ResponseEntity.ok("Verification link is resend");
     }
 
     @PostMapping("/sign-in")
-    public ResponseEntity<AuthResponse> signIn(@Valid @RequestBody SignInRequest signInRequest) {
-        return new ResponseEntity<>(authService.signIn(signInRequest), HttpStatus.OK);
+    public ResponseEntity<AuthResponseDto> signIn(@Valid @RequestBody SignInRequestDto signInRequestDto) {
+        return new ResponseEntity<>(defaultAuthService.signIn(signInRequestDto), HttpStatus.OK);
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<AuthResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
-        return new ResponseEntity<>(authService.refreshToken(refreshTokenRequest), HttpStatus.OK);
+    public ResponseEntity<AuthResponseDto> refreshToken(@Valid @RequestBody RefreshTokenRequestDto refreshTokenRequestDto) {
+        return new ResponseEntity<>(defaultRefreshTokenService.refreshToken(refreshTokenRequestDto), HttpStatus.OK);
     }
 }

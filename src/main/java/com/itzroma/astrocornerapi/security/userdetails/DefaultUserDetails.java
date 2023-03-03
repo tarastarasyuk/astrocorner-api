@@ -87,7 +87,7 @@ public class DefaultUserDetails implements OAuth2User, UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return false;
     }
 
     @Override

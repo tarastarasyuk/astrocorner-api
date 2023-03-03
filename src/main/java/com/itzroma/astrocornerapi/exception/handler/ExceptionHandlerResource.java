@@ -1,7 +1,7 @@
 package com.itzroma.astrocornerapi.exception.handler;
 
 import com.itzroma.astrocornerapi.exception.*;
-import com.itzroma.astrocornerapi.model.dto.HttpExceptionResponse;
+import com.itzroma.astrocornerapi.model.dto.HttpExceptionResponseDto;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,37 +18,37 @@ import java.util.stream.Collectors;
 public class ExceptionHandlerResource implements ErrorController {
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<HttpExceptionResponse> badCredentialsException(BadCredentialsException ex) {
+    public ResponseEntity<HttpExceptionResponseDto> badCredentialsException(BadCredentialsException ex) {
         return createResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @ExceptionHandler(EmailTakenException.class)
-    public ResponseEntity<HttpExceptionResponse> emailTakenException(EmailTakenException ex) {
+    public ResponseEntity<HttpExceptionResponseDto> emailTakenException(EmailTakenException ex) {
         return createResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<HttpExceptionResponse> entityNotFoundException(EntityNotFoundException ex) {
+    public ResponseEntity<HttpExceptionResponseDto> entityNotFoundException(EntityNotFoundException ex) {
         return createResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     @ExceptionHandler(EVTConfirmedException.class)
-    public ResponseEntity<HttpExceptionResponse> evtConfirmedException(EVTConfirmedException ex) {
+    public ResponseEntity<HttpExceptionResponseDto> evtConfirmedException(EVTConfirmedException ex) {
         return createResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @ExceptionHandler(EVTExpiredException.class)
-    public ResponseEntity<HttpExceptionResponse> evtExpiredException(EVTExpiredException ex) {
+    public ResponseEntity<HttpExceptionResponseDto> evtExpiredException(EVTExpiredException ex) {
         return createResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @ExceptionHandler(ReAuthenticationRequiredException.class)
-    public ResponseEntity<HttpExceptionResponse> reAuthenticationRequiredException(ReAuthenticationRequiredException ex) {
+    public ResponseEntity<HttpExceptionResponseDto> reAuthenticationRequiredException(ReAuthenticationRequiredException ex) {
         return createResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<HttpExceptionResponse> handleValidationException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<HttpExceptionResponseDto> handleValidationException(MethodArgumentNotValidException ex) {
         Map<String, String> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -57,7 +57,7 @@ public class ExceptionHandlerResource implements ErrorController {
         return createResponse(HttpStatus.BAD_REQUEST, errors.toString());
     }
 
-    private ResponseEntity<HttpExceptionResponse> createResponse(HttpStatus httpStatus, String message) {
-        return new ResponseEntity<>(new HttpExceptionResponse(httpStatus, message), httpStatus);
+    private ResponseEntity<HttpExceptionResponseDto> createResponse(HttpStatus httpStatus, String message) {
+        return new ResponseEntity<>(new HttpExceptionResponseDto(httpStatus, message), httpStatus);
     }
 }
