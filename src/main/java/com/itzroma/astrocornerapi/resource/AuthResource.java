@@ -1,6 +1,7 @@
 package com.itzroma.astrocornerapi.resource;
 
 import com.itzroma.astrocornerapi.model.dto.*;
+import com.itzroma.astrocornerapi.security.service.JwtService;
 import com.itzroma.astrocornerapi.service.impl.DefaultAuthService;
 import com.itzroma.astrocornerapi.service.impl.DefaultEmailVerificationTokenService;
 import com.itzroma.astrocornerapi.service.impl.DefaultRefreshTokenService;
@@ -16,9 +17,8 @@ import org.springframework.web.bind.annotation.*;
 public class AuthResource {
 
     private final DefaultAuthService defaultAuthService;
-
     private final DefaultEmailVerificationTokenService defaultEmailVerificationTokenService;
-    private final DefaultRefreshTokenService defaultRefreshTokenService;
+    private final JwtService jwtService;
 
     @PostMapping("/sign-up")
     public ResponseEntity<UserDto> signUn(@Valid @RequestBody SignUpRequestDto signUpRequestDto) {
@@ -49,6 +49,6 @@ public class AuthResource {
 
     @PostMapping("/refresh-token")
     public ResponseEntity<AuthResponseDto> refreshToken(@Valid @RequestBody RefreshTokenRequestDto refreshTokenRequestDto) {
-        return new ResponseEntity<>(defaultRefreshTokenService.refreshToken(refreshTokenRequestDto), HttpStatus.OK);
+        return new ResponseEntity<>(jwtService.refreshToken(refreshTokenRequestDto), HttpStatus.OK);
     }
 }

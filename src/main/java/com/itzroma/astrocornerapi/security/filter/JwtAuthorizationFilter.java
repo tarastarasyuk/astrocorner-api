@@ -60,7 +60,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
             return authHeader.split(" ")[1];
-        } else {
+        } else if (request.getRequestURI().contains("oauth2")){
 //            Object tokenAttr = request.getSession().getAttribute(OAUTH2_JWT_TOKEN_PASS_NAME) ;
 //            if (Objects.nonNull(tokenAttr)) {
 //                return (String) tokenAttr;

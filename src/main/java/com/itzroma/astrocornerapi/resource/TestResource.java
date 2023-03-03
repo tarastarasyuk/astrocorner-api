@@ -21,4 +21,16 @@ public class TestResource {
     public ResponseEntity<String> authenticated(Principal principal) {
         return ResponseEntity.ok("hello authenticated"+principal.getName());
     }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/my-profile")
+    public ResponseEntity<String> myProfile(Principal principal) {
+        return ResponseEntity.ok("myProfile "+principal.getName());
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/register-additional")
+    public ResponseEntity<String> registerStepTwo(Principal principal) {
+        return ResponseEntity.ok("registerStepTwo "+principal.getName());
+    }
 }

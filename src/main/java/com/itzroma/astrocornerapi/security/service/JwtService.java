@@ -7,6 +7,9 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.itzroma.astrocornerapi.exception.EntityNotFoundException;
+import com.itzroma.astrocornerapi.exception.ReAuthenticationRequiredException;
+import com.itzroma.astrocornerapi.model.dto.AuthResponseDto;
+import com.itzroma.astrocornerapi.model.dto.RefreshTokenRequestDto;
 import com.itzroma.astrocornerapi.model.entity.RefreshToken;
 import com.itzroma.astrocornerapi.model.entity.User;
 import com.itzroma.astrocornerapi.repository.UserRepository;
@@ -109,6 +112,15 @@ public class JwtService {
 
     public boolean validateRefreshToken(String token) {
         return validateToken(token, refreshTokenAlgorithm);
+    }
+
+    public AuthResponseDto refreshToken(RefreshTokenRequestDto refreshTokenRequestDto) {
+        RefreshToken refreshToken = defaultRefreshTokenService.findByToken(refreshTokenRequestDto.refreshToken());
+        if (validateRefreshToken(refreshToken.getToken())) {
+            String accessToken = generateAccessToken(DefaultUserDetails.fromUser(refreshToken.getUser()));
+            return new AuthResponseDto(accessToken, refreshToken.getToken());
+        }
+        throw new ReAuthenticationRequiredException();
     }
 
     public String getSubjectFromAccessToken(String token) {

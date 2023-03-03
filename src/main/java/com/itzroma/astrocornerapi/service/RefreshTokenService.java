@@ -14,6 +14,4 @@ public interface RefreshTokenService {
     @Transactional
     void deleteByToken(String token);
 
-    AuthResponseDto refreshToken(RefreshTokenRequestDto refreshTokenRequestDto);
-
 }

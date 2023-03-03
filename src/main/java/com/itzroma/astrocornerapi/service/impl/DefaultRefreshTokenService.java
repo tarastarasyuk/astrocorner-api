@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 public class DefaultRefreshTokenService implements RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
-    private final JwtService jwtService;
 
     @Override
     public RefreshToken save(RefreshToken refreshToken) {
@@ -34,16 +33,6 @@ public class DefaultRefreshTokenService implements RefreshTokenService {
     @Override
     public void deleteByToken(String token) {
         refreshTokenRepository.deleteByToken(token);
-    }
-
-    @Override
-    public AuthResponseDto refreshToken(RefreshTokenRequestDto refreshTokenRequestDto) {
-        RefreshToken refreshToken = findByToken(refreshTokenRequestDto.refreshToken());
-        if (jwtService.validateRefreshToken(refreshToken.getToken())) {
-            String accessToken = jwtService.generateAccessToken(DefaultUserDetails.fromUser(refreshToken.getUser()));
-            return new AuthResponseDto(accessToken, refreshToken.getToken());
-        }
-        throw new ReAuthenticationRequiredException();
     }
 
 }

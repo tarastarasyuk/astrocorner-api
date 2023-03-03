@@ -17,7 +17,7 @@ public class EmailVerificationEventListener {
 
     @EventListener
     public void onApplicationEvent(EmailVerificationEvent event) {
-        String url = event.getUrl() + "verifyRegistration?token=" + event.getEmailVerificationToken().getToken();
+        String url = event.getUrl() + "auth/verifyRegistration?token=" + event.getEmailVerificationToken().getToken();
 
         User user = event.getUser();
         emailSender.send(user.getEmail(), buildEmail(user.getEmail(), url));
