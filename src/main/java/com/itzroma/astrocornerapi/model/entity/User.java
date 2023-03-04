@@ -24,7 +24,7 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)
+    @Column
     private String password;
 
     @NotNull
@@ -32,8 +32,10 @@ public class User {
     private AuthProvider provider;
 
     private String providerId;
+    private String info;
 
-    private String name;
+    private String firstName;
+    private String lastName;
 
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;

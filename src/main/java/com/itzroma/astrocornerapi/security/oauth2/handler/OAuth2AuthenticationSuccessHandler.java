@@ -40,7 +40,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         String targetUrl = determineTargetUrl(request, response, authentication);
 
-        addJwtTokenInSession(request, authentication);
+        addAuthInSession(request, authentication);
 
         if (response.isCommitted()) {
             log.debug("Response has already been committed. Unable to redirect to " + targetUrl);
@@ -51,9 +51,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 
-    private void addJwtTokenInSession(HttpServletRequest request, Authentication authentication) {
-        String token = jwtService.generateAccessToken((DefaultUserDetails) authentication.getPrincipal());
-        request.getSession().setAttribute(OAUTH2_JWT_TOKEN_PASS_NAME, token);
+    private void addAuthInSession(HttpServletRequest request, Authentication authentication) {
+        request.getSession().setAttribute(OAUTH2_JWT_TOKEN_PASS_NAME, authentication);
     }
 
     protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {

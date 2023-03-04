@@ -15,13 +15,15 @@ public class DefaultUserDetails implements OAuth2User, UserDetails {
     private Long id;
     private String email;
     private String password;
+    private boolean enabled;
     private Collection<? extends GrantedAuthority> authorities;
     private Map<String, Object> attributes;
 
-    public DefaultUserDetails(Long id, String email, String password, Collection<? extends GrantedAuthority> authorities) {
+    public DefaultUserDetails(Long id, String email, String password, boolean enabled ,Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.email = email;
         this.password = password;
+        this.enabled = enabled;
         this.authorities = authorities;
     }
 
@@ -30,6 +32,7 @@ public class DefaultUserDetails implements OAuth2User, UserDetails {
                 user.getId(),
                 user.getEmail(),
                 user.getPassword(),
+                user.getEnabled(),
                 Collections.singleton(user.getRole())
         );
     }
@@ -42,6 +45,7 @@ public class DefaultUserDetails implements OAuth2User, UserDetails {
                 user.getId(),
                 user.getEmail(),
                 user.getPassword(),
+                user.getEnabled(),
                 authorities
         );
     }
@@ -87,7 +91,7 @@ public class DefaultUserDetails implements OAuth2User, UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return enabled;
     }
 
     @Override

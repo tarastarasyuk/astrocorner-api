@@ -7,6 +7,8 @@ import com.itzroma.astrocornerapi.security.oauth2.userinformation.OAuth2UserInfo
 import com.itzroma.astrocornerapi.security.oauth2.userinformation.OAuth2UserInfoFactory;
 import com.itzroma.astrocornerapi.model.entity.AuthProvider;
 import com.itzroma.astrocornerapi.security.userdetails.DefaultUserDetails;
+import com.itzroma.astrocornerapi.security.util.CookieUtils;
+import com.itzroma.astrocornerapi.service.impl.DefaultUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +20,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+
+import static com.itzroma.astrocornerapi.security.oauth2.constant.DefaultOAuth2Constant.OAUTH2_REDIRECT_URI_PARAM_COOKIE_NAME;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -65,6 +69,7 @@ public class DefaultOAuth2UserService extends org.springframework.security.oauth
             }
             user = updateExistingUser(user, oAuth2UserInfo);
         } else {
+//            CookieUtils.getCookie(request, OAUTH2_REDIRECT_URI_PARAM_COOKIE_NAME);
             user = registerNewUser(oAuth2UserRequest, oAuth2UserInfo);
         }
         return user;
@@ -73,16 +78,32 @@ public class DefaultOAuth2UserService extends org.springframework.security.oauth
     private User registerNewUser(OAuth2UserRequest oAuth2UserRequest, OAuth2UserInfo oAuth2UserInfo) {
         User user = new User();
 
-        user.setProvider(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()));
+        user.setProvider(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId().toUpperCase()));
         user.setProviderId(oAuth2UserInfo.getId());
-        user.setName(oAuth2UserInfo.getName());
+
+        user.setFirstName(userNames(oAuth2UserInfo.getName())[0]);
+        user.setLastName(userNames(oAuth2UserInfo.getName())[1]);
+
         user.setEmail(oAuth2UserInfo.getEmail());
+
+        skipEmailVerification(user);
         return userRepository.save(user);
     }
 
     private User updateExistingUser(User existingUser, OAuth2UserInfo oAuth2UserInfo) {
-        existingUser.setName(oAuth2UserInfo.getName());
+        existingUser.setFirstName(userNames(oAuth2UserInfo.getName())[0]);
+        existingUser.setLastName(userNames(oAuth2UserInfo.getName())[1]);
+
+        skipEmailVerification(existingUser);
         return userRepository.save(existingUser);
+    }
+
+    private void skipEmailVerification(User user) {
+        user.setEnabled(true);
+    }
+
+    private String[] userNames(String fullName) {
+        return fullName.trim().split(" ");
     }
 
 }

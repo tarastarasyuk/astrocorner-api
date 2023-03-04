@@ -22,10 +22,11 @@ public class DefaultUserService implements UserService {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new EmailTakenException();
         }
-
-        // TODO: Change flow
-        user.setProvider(AuthProvider.GOOGLE);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepository.save(user);
+    }
+
+    public User update(User user) {
         return userRepository.save(user);
     }
 
